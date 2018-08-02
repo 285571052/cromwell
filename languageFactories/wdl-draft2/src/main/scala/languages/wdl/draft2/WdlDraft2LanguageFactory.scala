@@ -1,32 +1,35 @@
 package languages.wdl.draft2
 
+import java.util.concurrent.{Callable, TimeUnit}
+
+import cats.data.EitherT.fromEither
+import cats.effect.IO
 import cats.instances.either._
 import cats.instances.list._
 import cats.syntax.functor._
-import cats.data.EitherT.fromEither
-import cats.effect.IO
 import cats.syntax.traverse._
+import com.google.common.cache.{Cache, CacheBuilder}
 import common.Checked
-import common.validation.Validation._
 import common.validation.Checked._
 import common.validation.ErrorOr.{ErrorOr, _}
 import common.validation.Parse.Parse
+import common.validation.Validation._
 import cromwell.core._
 import cromwell.languages.util.ImportResolver.{ImportResolutionRequest, ImportResolver}
 import cromwell.languages.util.{ImportResolver, LanguageFactoryUtil}
 import cromwell.languages.{LanguageFactory, ValidatedWomNamespace}
+import languages.wdl.draft2.WdlDraft2LanguageFactory._
 import wdl.draft2.model.{Draft2ImportResolver, WdlNamespace, WdlNamespaceWithWorkflow}
 import wdl.shared.transforms.wdlom2wom.WdlSharedInputParsing
 import wdl.transforms.draft2.wdlom2wom.WdlDraft2WomBundleMakers._
-import wom.core.{WorkflowJson, WorkflowOptionsJson, WorkflowSource}
-import wom.graph.GraphNodePort.OutputPort
 import wdl.transforms.draft2.wdlom2wom.WdlDraft2WomExecutableMakers._
+import wom.core.{WorkflowJson, WorkflowOptionsJson, WorkflowSource}
 import wom.executable.WomBundle
 import wom.expression.IoFunctionSet
-import wom.transforms.WomExecutableMaker.ops._
+import wom.graph.GraphNodePort.OutputPort
 import wom.transforms.WomBundleMaker.ops._
-import wom.values.WomValue
-import languages.wdl.draft2.WdlDraft2LanguageFactory._
+import wom.transforms.WomExecutableMaker.ops._
+import wom.values.{WomValue, _}
 
 class WdlDraft2LanguageFactory(override val config: Map[String, Any]) extends LanguageFactory {
 
@@ -54,18 +57,18 @@ class WdlDraft2LanguageFactory(override val config: Map[String, Any]) extends La
       list.sequence[Checked, Unit].void
     }
 
-    import common.validation.Validation._
-
-    lazy val wdlNamespaceValidation: ErrorOr[WdlNamespaceWithWorkflow] = source match {
-      case w: WorkflowSourceFilesWithDependenciesZip =>
-        for {
-          importsDir <- LanguageFactoryUtil.validateImportsDirectory(w.importsZip)
-          wf <- WdlNamespaceWithWorkflow.load(workflowSource, importResolvers map resolverConverter).toErrorOr
-          _ = importsDir.delete(swallowIOExceptions = true)
-        } yield wf
-      case _: WorkflowSourceFilesWithoutImports =>
-        WdlNamespaceWithWorkflow.load(workflowSource, importResolvers map resolverConverter).toErrorOr
-    }
+    lazy val wdlNamespaceValidation: ErrorOr[WdlNamespaceWithWorkflow] = namespaces.get(workflowSource.md5Sum, new Callable[ErrorOr[WdlNamespaceWithWorkflow]] {
+      def call: ErrorOr[WdlNamespaceWithWorkflow] = source match {
+        case w: WorkflowSourceFilesWithDependenciesZip =>
+          for {
+            importsDir <- LanguageFactoryUtil.validateImportsDirectory(w.importsZip)
+            wf <- WdlNamespaceWithWorkflow.load(workflowSource, importResolvers map resolverConverter).toErrorOr
+            _ = importsDir.delete(swallowIOExceptions = true)
+          } yield wf
+        case _: WorkflowSourceFilesWithoutImports =>
+          WdlNamespaceWithWorkflow.load(workflowSource, importResolvers map resolverConverter).toErrorOr
+      }
+    })
 
     def evaluateImports(wdlNamespace: WdlNamespace): Map[String, String] = {
       // Descend the namespace looking for imports and construct `MetadataEvent`s for them.
@@ -132,4 +135,10 @@ object WdlDraft2LanguageFactory {
 
   val httpResolver = resolverConverter(ImportResolver.HttpResolver())
   def httpResolverWithHeaders(headers: Map[String, String]) = resolverConverter(ImportResolver.HttpResolver(headers = headers))
+
+  private val namespaces: Cache[WorkflowSource, ErrorOr[WdlNamespaceWithWorkflow]] = CacheBuilder.newBuilder()
+    .concurrencyLevel(2)
+    .expireAfterWrite(20, TimeUnit.MINUTES)
+    .maximumSize(1000)
+    .build[WorkflowSource, ErrorOr[WdlNamespaceWithWorkflow]]()
 }
