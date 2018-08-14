@@ -16,7 +16,7 @@ object HuaweiBatchBackendJobExecutionActor {
   val JobIdKey = "__huawei_batch_job_id"
 }
 
-class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardAsyncExecutionActorParams) extends BackendJobLifecycleActor with StandardAsyncExecutionActor {
+class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardAsyncExecutionActorParams) extends BackendJobLifecycleActor with StandardAsyncExecutionActor with HuaweiBatchJobCachingActorHelper {
   /** The type of the run info when a job is started. */
   override type StandardAsyncRunInfo = HuaweiBatchJob
   /** The type of the run status returned during each poll. */
@@ -107,7 +107,7 @@ class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardA
 
   override def executeAsync(): Future[ExecutionHandle] = {
     Future.fromTry(Try(execute()))
-    val huaweiBatchJob = new HuaweiBatchJob(jobPaths)
+    val huaweiBatchJob = new HuaweiBatchJob(jobPaths, huaweiBatchRegion)
     for {
       jobId <- Future.fromTry(huaweiBatchJob.submit())
     } yield PendingExecutionHandle(jobDescriptor, StandardAsyncJob(jobId), Option(huaweiBatchJob), previousStatus = None)

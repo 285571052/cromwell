@@ -7,11 +7,12 @@ import scala.util.Try
 import org.slf4j.LoggerFactory
 
 //TODO: add batch client
-final case class HuaweiBatchJob(jobPaths: JobPaths) {
+final case class HuaweiBatchJob(jobPaths: JobPaths, huaweiBatchRegion: String) {
 
   def submit(): Try[String] = Try {
     val logger = LoggerFactory.getLogger("HuaweiBatchJob")
     logger.warn("HuaweiBacthJob.submit()")
+    logger.warn(huaweiBatchRegion)
     val jobId = "job_id"
     jobId
   }
