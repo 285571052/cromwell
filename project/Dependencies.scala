@@ -437,6 +437,9 @@ object Dependencies {
   )
 
   val bcsBackendDependencies = commonDependencies ++ refinedTypeDependenciesList ++ aliyunBatchComputeDependencies
+  val huaweiBatchBackendDependencies = List(
+    "org.slf4j" % "slf4j-api" % slf4jV
+  )
   val tesBackendDependencies = akkaHttpDependencies
   val sparkBackendDependencies = akkaHttpDependencies
 

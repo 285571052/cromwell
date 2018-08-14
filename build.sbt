@@ -211,6 +211,13 @@ lazy val bcsBackend = (project in backendRoot / "bcs")
   .dependsOn(ossFileSystem % "test->test")
   .dependsOn(services % "test->test")
 
+lazy val huaweiBatchBackend = (project in backendRoot / "huawei" / "batch")
+  .withLibrarySettings("cromwell-huawei-batch-backend", huaweiBatchBackendDependencies)
+  .dependsOn(backend)
+  .dependsOn(backend % "test->test")
+  .dependsOn(core)
+  .dependsOn(core % "test->test")
+
 lazy val engine = project
   .withLibrarySettings("cromwell-engine", engineDependencies, engineSettings)
   .dependsOn(backend)
@@ -296,6 +303,7 @@ lazy val server = project
   .dependsOn(wdlBiscayneLanguageFactory)
   .dependsOn(cwlV1_0LanguageFactory)
   .dependsOn(engine % "test->test")
+  .dependsOn(huaweiBatchBackend)
 
 lazy val root = (project in file("."))
   .withRootSettings()
@@ -345,3 +353,4 @@ lazy val root = (project in file("."))
   .aggregate(wes2cromwell)
   .aggregate(wom)
   .aggregate(womtool)
+  .aggregate(huaweiBatchBackend)
