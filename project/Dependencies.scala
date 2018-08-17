@@ -303,6 +303,22 @@ object Dependencies {
     "com.github.pathikrit" %% "better-files" % betterFilesV
   )
 
+  val huaweiBatchObsFileSystemDependencies = List (
+    "com.huawei.storage" % "obs" % "2.1.23" % "provided" from "file:///C:\\cromwell\\lib\\esdk-obs-java-2.1.23.jar"
+  )
+  val obsFileSystemDependencies = huaweiBatchObsFileSystemDependencies ++ List (
+    "commons-codec" % "commons-codec" % "1.9" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\commons-codec-1.9.jar",
+    "commons-logging" % "commons-logging" % "1.2" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\commons-logging-1.2.jar",
+    "httpasyncclient" % "httpasyncclient" % "4.1.2" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\httpasyncclient-4.1.2.jar",
+    "httpclient" % "httpclient" % "4.5.3" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\httpclient-4.5.3.jar",
+    "httpcore" % "httpcore" % "4.4.4" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\httpcore-4.4.4.jar",
+    "httpcore-nio" % "httpcore-nio" % "4.4.4" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\httpcore-nio-4.4.4.jar",
+    "java-xmlbuilder" % "java-xmlbuilder" % "1.1" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\java-xmlbuilder-1.1.jar",
+    "jna" % "jna" % "4.1.0" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\jna-4.1.0.jar",
+    "log4j-api" % "log4j-api" % "2.8.2" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\log4j-api-2.8.2.jar",
+    "log4j-core" % "log4j-core" % "2.8.2" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\log4j-core-2.8.2.jar"
+  )
+
   val commonDependencies = List(
     "org.slf4j" % "slf4j-api" % slf4jV,
     "org.typelevel" %% "cats-effect" % catsEffectV,
@@ -438,7 +454,8 @@ object Dependencies {
 
   val bcsBackendDependencies = commonDependencies ++ refinedTypeDependenciesList ++ aliyunBatchComputeDependencies
   val huaweiBatchBackendDependencies = List(
-    "org.slf4j" % "slf4j-api" % slf4jV
+    "org.slf4j" % "slf4j-api" % slf4jV,
+    "com.huawei.batch" % "client" % "1.0" % "provided" from "file:///C:\\cromwell\\lib\\batch-sdk-java-0.1.jar"
   )
   val tesBackendDependencies = akkaHttpDependencies
   val sparkBackendDependencies = akkaHttpDependencies

@@ -109,6 +109,11 @@ lazy val ossFileSystem = (project in file("filesystems/oss"))
   .dependsOn(core)
   .dependsOn(core % "test->test")
 
+lazy val obsFileSystem = (project in file("filesystems/obs"))
+  .withLibrarySettings("cromwell-obsFileSystem", obsFileSystemDependencies)
+  .dependsOn(core)
+  .dependsOn(core % "test->test")
+
 lazy val databaseSql = (project in file("database/sql"))
   .withLibrarySettings("cromwell-database-sql", databaseSqlDependencies)
 
@@ -217,6 +222,8 @@ lazy val huaweiBatchBackend = (project in backendRoot / "huawei" / "batch")
   .dependsOn(backend % "test->test")
   .dependsOn(core)
   .dependsOn(core % "test->test")
+  .dependsOn(obsFileSystem)
+  .dependsOn(obsFileSystem % "test->test")
 
 lazy val engine = project
   .withLibrarySettings("cromwell-engine", engineDependencies, engineSettings)
@@ -231,6 +238,8 @@ lazy val engine = project
   .dependsOn(sfsBackend % "test->compile")
   .dependsOn(gcsFileSystem % "test->test")
   .dependsOn(ossFileSystem % "test->test")
+  .dependsOn(obsFileSystem)
+  .dependsOn(obsFileSystem % "test->test")
 
 // Executables
 
@@ -354,3 +363,4 @@ lazy val root = (project in file("."))
   .aggregate(wom)
   .aggregate(womtool)
   .aggregate(huaweiBatchBackend)
+  .aggregate(obsFileSystem)
