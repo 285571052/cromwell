@@ -304,21 +304,19 @@ object Dependencies {
   )
 
   val huaweiBatchObsFileSystemDependencies = List (
-    "com.huawei.storage" % "obs" % "2.1.23" % "provided" from "file:///C:\\cromwell\\lib\\esdk-obs-java-2.1.23.jar"
+    "com.huawei.storage" % "esdk-obs-java" % "2.1.23" from "file:///C:\\cromwell\\lib\\esdk-obs-java-2.1.23-raw.jar",
+	"com.jamesmurty.utils" % "java-xmlbuilder" % "1.1" ,
+	"commons-codec" % "commons-codec" % "1.9" % "provided",
+	"commons-logging" % "commons-logging" % "1.2" % "provided",
+	"org.apache.httpcomponents" % "httpasyncclient" % "4.1.2" ,
+	"org.apache.httpcomponents" % "httpclient" % "4.5.3" % "provided",
+	"org.apache.httpcomponents" % "httpcore" % "4.4.4" % "provided",
+	"org.apache.httpcomponents" % "httpcore-nio" % "4.4.4" ,
+	"org.apache.logging.log4j" % "log4j-api" % "2.8.2" % "provided",
+	"org.apache.logging.log4j" % "log4j-core" % "2.8.2" % "provided"
   )
-  val obsFileSystemDependencies = huaweiBatchObsFileSystemDependencies ++ List (
-    "commons-codec" % "commons-codec" % "1.9" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\commons-codec-1.9.jar",
-    "commons-logging" % "commons-logging" % "1.2" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\commons-logging-1.2.jar",
-    "httpasyncclient" % "httpasyncclient" % "4.1.2" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\httpasyncclient-4.1.2.jar",
-    "httpclient" % "httpclient" % "4.5.3" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\httpclient-4.5.3.jar",
-    "httpcore" % "httpcore" % "4.4.4" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\httpcore-4.4.4.jar",
-    "httpcore-nio" % "httpcore-nio" % "4.4.4" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\httpcore-nio-4.4.4.jar",
-    "java-xmlbuilder" % "java-xmlbuilder" % "1.1" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\java-xmlbuilder-1.1.jar",
-    "jna" % "jna" % "4.1.0" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\jna-4.1.0.jar",
-    "log4j-api" % "log4j-api" % "2.8.2" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\log4j-api-2.8.2.jar",
-    "log4j-core" % "log4j-core" % "2.8.2" % "provided" from "file:///C:\\cromwell\\lib\\third_party\\log4j-core-2.8.2.jar"
-  )
-
+  val obsFileSystemDependencies = huaweiBatchObsFileSystemDependencies
+  
   val commonDependencies = List(
     "org.slf4j" % "slf4j-api" % slf4jV,
     "org.typelevel" %% "cats-effect" % catsEffectV,
@@ -452,11 +450,20 @@ object Dependencies {
     "co.fs2" %% "fs2-io" % fs2V % Test
   )
 
-  val bcsBackendDependencies = commonDependencies ++ refinedTypeDependenciesList ++ aliyunBatchComputeDependencies
-  val huaweiBatchBackendDependencies = List(
-    "org.slf4j" % "slf4j-api" % slf4jV,
-    "com.huawei.batch" % "client" % "1.0" % "provided" from "file:///C:\\cromwell\\lib\\batch-sdk-java-0.1.jar"
+  val huaweiBatchDenpencies = List(
+    "com.huawei.aicloud" % "batch-sdk-java" % "1.0" from "file://C:\\cromwell\\lib\\batch-sdk-java-0.1-raw.jar",
+	"com.google.code.gson" % "gson" % "2.8.2",
+	"com.squareup.okhttp" % "logging-interceptor" % "2.7.5",
+	"com.squareup.okhttp" % "okhttp"% "2.7.5",
+	"com.squareup.okio" % "okio" % "1.6.0" ,
+	"joda-time" % "joda-time" % "2.9.3",
+	"org.apache.logging.log4j" % "log4j-api" % "2.10.0" ,
+	"org.apache.logging.log4j" % "log4j-core" % "2.10.0" 
   )
+  
+  val bcsBackendDependencies = commonDependencies ++ refinedTypeDependenciesList ++ aliyunBatchComputeDependencies
+  val huaweiBatchBackendDependencies = huaweiBatchDenpencies ++ List(
+    "org.slf4j" % "slf4j-api" % slf4jV  )
   val tesBackendDependencies = akkaHttpDependencies
   val sparkBackendDependencies = akkaHttpDependencies
 
