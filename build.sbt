@@ -224,6 +224,7 @@ lazy val huaweiBatchBackend = (project in backendRoot / "huawei" / "batch")
   .dependsOn(core % "test->test")
   .dependsOn(obsFileSystem)
   .dependsOn(obsFileSystem % "test->test")
+  .dependsOn(services % "test->test")
 
 lazy val engine = project
   .withLibrarySettings("cromwell-engine", engineDependencies, engineSettings)
