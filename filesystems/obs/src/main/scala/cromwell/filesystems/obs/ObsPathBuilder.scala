@@ -74,7 +74,7 @@ object ObsPathBuilder {
     Try {
       val uri = URI.create(UrlEscapers.urlFragmentEscaper().escape(string))
       if (uri.getScheme == null) PossiblyValidRelativeObsPath
-      else if (uri.getScheme.equalsIgnoreCase("obs")) {
+      else if (uri.getScheme.equalsIgnoreCase("https")) {
         if (uri.getHost == null) {
           softBucketParsing(string) map {
             ValidFullObsPath(_, uri.getPath)
