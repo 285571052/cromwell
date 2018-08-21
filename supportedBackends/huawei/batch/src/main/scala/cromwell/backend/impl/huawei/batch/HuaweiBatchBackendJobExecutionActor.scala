@@ -252,19 +252,12 @@ class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardA
     commandDirectory.resolve(huaweiBatchJobPaths.defaultStderrFilename), standardPaths.error, writeSupport = false)
 
   override def executeAsync(): Future[ExecutionHandle] = {
-    //Future.fromTry(Try(execute()))
-    val script = commandScriptContents match {
-      case Valid(s) => s
-      case errors => new RuntimeException(errors.toList.mkString(", "))
-    }
+    commandScriptContents.fold(
+      errors => Future.failed(new RuntimeException(errors.toList.mkString(", "))),
+      huaweiBatchJobPaths.script.write)
 
-//    commandScriptContents.fold(
-//      errors => Future.failed(new RuntimeException(errors.toList.mkString(", "))),
-//      huaweiBatchJobPaths.script.write)
-    //val script = commandScriptContents match {
-    //  case Valid(s) => s
-    //  case errors => new RuntimeException(errors.toList.mkString(", "))
-    //}
+    val script = s"cp ${commandDirectory.resolve(huaweiBatchJobPaths.scriptFilename)} /run.sh;. /run.sh;cat $rcPath|sed '/^\\s*$$/d' > $rcPath"
+
     val huaweiBatchJob = new HuaweiBatchJob(
       jobName,
       jobTag,
