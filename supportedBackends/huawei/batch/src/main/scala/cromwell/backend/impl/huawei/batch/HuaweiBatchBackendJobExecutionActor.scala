@@ -45,9 +45,9 @@ class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardA
 
   private[batch] lazy val jobName: String =
     List(userTag, jobDescriptor.workflowDescriptor.id.shortString, jobDescriptor.taskCall.identifier.localName.value)
-      .mkString("_")
-      // Avoid "Name ... must only contain characters within [a-zA-Z0-9_-] and not start with [0-9]."
-      .replaceAll("[^a-zA-Z0-9_-]", "_")
+      .mkString("-")
+      .replaceAll("[^a-zA-Z0-9-]", "-")
+      .toLowerCase()
 
   override lazy val jobTag: String = jobDescriptor.key.tag
 
