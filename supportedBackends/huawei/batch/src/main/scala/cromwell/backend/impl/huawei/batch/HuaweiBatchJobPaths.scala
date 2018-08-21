@@ -11,7 +11,7 @@ object HuaweiBatchJobPaths {
   val HuaweiBatchEnvStdoutKey = "stdout"
   val HuaweiBatchEnvStderrKey = "stderr"
   val HuaweiBatchCommandDirectory: Path = DefaultPathBuilder.get("/cromwell_root")
-  val HuaweiBatchTempInputDirectory: Path = DefaultPathBuilder.get("/cromwell_inputs")
+  val HuaweiBatchTempInputDirectory: Path = HuaweiBatchCommandDirectory
   val HuaweiBatchStdoutRedirectPath = "huaweiBatch-stdout"
   val HuaweiBatchStderrRedirectPath = "huaweiBatch-stderr"
 }
@@ -19,7 +19,6 @@ object HuaweiBatchJobPaths {
 final case class HuaweiBatchJobPaths(workflowPaths: HuaweiBatchWorkflowPaths, jobKey: BackendJobDescriptorKey) extends JobPaths {
 
   import HuaweiBatchJobPaths._
-
   val huaweiBatchStdoutPath = callRoot.resolve(HuaweiBatchStdoutRedirectPath)
   val huaweiBatchStderrPath = callRoot.resolve(HuaweiBatchStderrRedirectPath)
 }
