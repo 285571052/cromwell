@@ -1,6 +1,5 @@
 package cromwell.backend.impl.huawei.batch
 
-import cats.data.Validated.Valid
 import cromwell.backend.BackendJobLifecycleActor
 import cromwell.backend.impl.huawei.batch.RunStatus.{SUCCEEDED, TerminalRunStatus}
 import cromwell.backend._
@@ -15,7 +14,8 @@ import wom.core.FullyQualifiedName
 import wom.expression.NoIoFunctionSet
 import wom.types.WomSingleFileType
 import wom.values._
-import com.huawei.batch.client.ApiException;
+import com.huawei.batch.client.ApiException
+
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Success, Try}
@@ -31,7 +31,6 @@ class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardA
   override type StandardAsyncRunStatus = RunStatus
 
   type HuaweiBatchPendingExecutionHandle = PendingExecutionHandle[StandardAsyncJob, HuaweiBatchJob, RunStatus]
-
 
   override lazy val dockerImageUsed: Option[String] = None
 
@@ -94,7 +93,6 @@ class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardA
       case (name, files) => name -> files
     }
 
-    // Collect all WomFiles from inputs to the call.
     val callInputFiles: Map[FullyQualifiedName, Seq[WomFile]] = jobDescriptor.fullyQualifiedInputs mapValues {
       _.collectAsSeq { case w: WomFile => w }
     }
@@ -127,8 +125,6 @@ class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardA
       ).getOrElse(List.empty[WomFile].validNel)
         .getOrElse(List.empty)
     }
-
-    // val womFileOutputs = call.task.findOutputFiles(jobDescriptor.fullyQualifiedInputs, PureStandardLibraryFunctions)
 
     jobDescriptor.taskCall.callable.outputs.flatMap(evaluateFiles)
   }

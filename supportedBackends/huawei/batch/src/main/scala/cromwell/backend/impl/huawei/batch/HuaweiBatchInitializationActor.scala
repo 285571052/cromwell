@@ -34,11 +34,6 @@ final class HuaweiBatchInitializationActor(params: HuaweiBatchInitializationActo
   override lazy val runtimeAttributesBuilder: StandardValidatedRuntimeAttributesBuilder =
     HuaweiBatchRuntimeAttributes.runtimeAttributesBuilder(huaweiBatchConfiguration.runtimeConfig)
 
-  //  override lazy val initializationData: Future[HuaweiBatchBackendInitializationData] =
-  //    workflowPaths map {
-  //      new HuaweiBatchBackendInitializationData(_, runtimeAttributesBuilder, huaweiBatchConfiguration)
-  //    }
-
   override def beforeAll(): Future[Option[BackendInitializationData]] = {
     pathBuilders map { builders => HuaweiBatchMount.pathBuilders = builders }
 
