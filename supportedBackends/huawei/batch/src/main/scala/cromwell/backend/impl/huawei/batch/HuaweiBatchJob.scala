@@ -1,22 +1,20 @@
 package cromwell.backend.impl.huawei.batch
 
 import cromwell.core.ExecutionEvent
+
 import scala.util.Try
 import org.slf4j.LoggerFactory
 import com.huawei.batch.client.ApiException
 import com.huawei.batch.client.BatchApi
-import com.huawei.batch.model.ComputeEnv
+import com.huawei.batch.model.{ComputeEnv, LogRedirectPath, RetryPolicy, MountPath}
 import com.huawei.batch.model.job.{JobAddParameter, JobInfo, JobState}
 import com.huawei.batch.model.task.TaskAddParameter
 import com.huawei.batch.model.task.TaskDefinition
-import com.huawei.batch.model.LogRedirectPath
-import com.huawei.batch.model.RetryPolicy
 import com.huawei.batch.model.task.TaskDocker
 import com.huawei.batch.model.task.TaskResourceAffinity
 import com.huawei.batch.model.task.TaskResourceLimit
 import cromwell.core.path.Path
 
-//TODO: add batch client
 final case class HuaweiBatchJob(name: String,
                                 description: String,
                                 commandString: String,
@@ -29,14 +27,15 @@ final case class HuaweiBatchJob(name: String,
                                 batchApi: BatchApi) {
 
   lazy val lazyTask: java.util.List[TaskAddParameter] = new java.util.ArrayList
+  val logger = LoggerFactory.getLogger("HuaweiBatchJob")
 
   private[batch] def taskAddParameters: java.util.List[TaskAddParameter] = {
     val resourceAffinity = new TaskResourceAffinity
     resourceAffinity.setPoolId("poolx2l01l9q")
 
     val logRedirectPath = new LogRedirectPath
-    logRedirectPath.setStderrRedirectPath("")
-    logRedirectPath.setStdoutRedirectPath("")
+    stdoutPath foreach { path => logRedirectPath.setStderrRedirectPath(path.normalize().pathAsString + "/") }
+    stderrPath foreach { path => logRedirectPath.setStdoutRedirectPath(path.normalize().pathAsString + "/") }
 
     val resourceLimit = new TaskResourceLimit
     resourceLimit.setCpu(1)
@@ -50,18 +49,38 @@ final case class HuaweiBatchJob(name: String,
     //docker.setServer("100.125.5.235:20202/")
     val taskDefinition = new TaskDefinition
 
-    taskDefinition.setTaskNamePrefix("sdk-task-1-1")
+    taskDefinition.setTaskNamePrefix("cromwell")
     taskDefinition.setDescription("created by sdk")
-    taskDefinition.setCmd("sleep 3")
-    //taskDefinition.setCmd(script)
+    taskDefinition.setCmd(script)
     taskDefinition.setResourceLimit(resourceLimit)
     taskDefinition.setRetryPolicy(retryPolicy)
     taskDefinition.setDocker(docker)
     taskDefinition.setResourceAffinity(resourceAffinity)
     taskDefinition.setLogRedirectPath(logRedirectPath)
+    //taskDefinition.setEnv(environments.asJava)
+
+    mounts foreach {
+      case input: HuaweiBatchInputMount =>
+        var destStr = input.dest.pathAsString
+        if (input.src.pathAsString.endsWith("/") && !destStr.endsWith("/")) {
+          destStr += "/"
+        }
+        logger.warn(input.src.pathAsString)
+        logger.warn(destStr)
+        taskDefinition.addInputs(new MountPath(input.src.pathAsString, destStr))
+      case output: HuaweiBatchOutputMount =>
+        var srcStr = output.src.pathAsString
+        if (output.dest.pathAsString.endsWith("/") && !srcStr.endsWith("/")) {
+          srcStr += "/"
+        }
+        logger.warn(srcStr)
+        logger.warn(output.dest.pathAsString)
+        taskDefinition.addOutputs(new MountPath(srcStr, output.dest.pathAsString))
+    }
+
     val taskAddParameter = new TaskAddParameter
     taskAddParameter.setTaskDefinition(taskDefinition)
-    taskAddParameter.setTaskGroupName("sdk-task-1")
+    taskAddParameter.setTaskGroupName("cromwell-group")
     taskAddParameter.setReplicas(1)
 
     lazyTask.add(taskAddParameter);
@@ -78,8 +97,8 @@ final case class HuaweiBatchJob(name: String,
     computeEnvs.add(computeEnv)
 
     val jobAddParameter: JobAddParameter = new JobAddParameter()
-    jobAddParameter.setJobName("sdk-job")
-      .setDescription("created by sdk")
+    jobAddParameter.setJobName(name)
+      .setDescription(description)
       .setMaxTimeout(0)
       .setPriority(5)
       .setScheduledTime("")
@@ -90,17 +109,19 @@ final case class HuaweiBatchJob(name: String,
   }
 
   def submit(): Try[String] = Try {
-    val logger = LoggerFactory.getLogger("HuaweiBatchJob")
+
     var jobId: String = "__jobId";
     try {
       jobId = batchApi.addJob(jobAddParameter)
     } catch {
       case ex: ApiException => {
-        ex.printStackTrace()
+        logger.error(ex.getCode.toString)
+        logger.error(ex.getResponseBody)
+        //ex.printStackTrace()
       }
     }
-    logger.warn(jobId)
     logger.warn("HuaweiBacthJob.submit()")
+    logger.warn(jobId)
     jobId
   }
 
