@@ -351,6 +351,7 @@ class HuaweiBatchBackendJobExecutionActor(override val standardParams: StandardA
   private[batch] lazy val huaweiBatchMounts: Seq[HuaweiBatchMount] = {
     generateHuaweiBatchInputs(jobDescriptor)
     runtimeAttributes.mounts.getOrElse(Seq.empty) ++ inputMounts ++
-      generateHuaweiBatchOutputs(jobDescriptor) :+ rcHuaweiBatchOutput :+ stdoutHuaweiBatchOutput :+ stderrHuaweiBatchOutput :+ huaweiBatchWorkflowInputMount
+      generateHuaweiBatchOutputs(jobDescriptor) :+ huaweiBatchWorkflowInputMount
   }
+
 }
